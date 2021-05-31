@@ -1,0 +1,699 @@
+---
+title: "AIRBNB en Manhattan"
+author: "NORA HAFIDI y LUCÍA INÉS MERLO"
+date: "26/1/2021"
+output:
+  html_document: default
+  word_document: default
+---
+
+```{r, warning=FALSE, include = FALSE}
+library(dplyr)
+library(leaflet)
+library(sp)
+library(ggmap)
+library(maptools)
+library(broom)
+library(httr)
+library(rgdal)
+library(rgeos)
+library(ggplot2)
+library(ggthemes)
+library(RColorBrewer)
+library(maps)
+library(geosphere)
+library(plotly)
+library(ggthemes)
+library(leaflet)
+library(crosstalk)
+```
+
+
+#### Índice
+
+1. Introducción al tema
+
+
+    1.1. Qué es Airbnb
+  
+    1.2. Cómo surgió
+  
+    1.3. Funcionamiento
+  
+    1.4. Airbnb en Nueva York
+  
+2. Objetivo y pregunta
+
+
+3. Las siete fases 
+
+    3.1. Adquisición
+  
+    3.2. Formateado 
+  
+    3.3. Filtrado
+  
+    3.4. Minado
+  
+    3.5. Representación
+  
+    3.6. Refinado
+  
+    3.7. Interacción
+  
+4. Conclusión al trabajo
+
+
+5. Webgrafía
+
+
+
+
+
+#### 1. Introducción al tema
+##### 1.1. Qué es Airbnb
+
+<div class="pull-right"><img src="https://img1.freepng.es/20180629/lw/kisspng-airbnb-rebrand-logo-online-marketplace-rebranding-airbnb-logo-5b35bad14fef57.5831675415302478893274.jpg" height="250px" width="200px"/></div/>
+
+Airbnb es una plataforma digital la cual publica ofertas de alojamiento y diversos servicios proporcionados por anfitriones particulares. Los anfitriones publicitan el espacio que desean arrendar en la plataforma, en un trato de igual a igual con el huésped a la hora de efectuar el contrato de alquiler.
+ 
+Con la sede central ubicada en San Francisco, California, desde su creación lleva más de 10 millones de reservas efectuadas. Actualmente se encuentra disponible en 220 países y regiones, en 100.000 ciudades, con 2.000.000 de alojamientos ofrecidos por más de 4 millones de anfitriones alrededor del mundo. 
+Uno de los aspectos innovadores de esta compañía, son el amplio abanico de hospedajes que se ofrecen. Extraído de la web de la empresa, la misma tiene publicadas: 90.000 cabañas, 40.000 granjas, 24.000 microcasas, 5600 barcos, 3500 castillos, 2800 yurtas, 2600 casas del árbol, 1600 islas privadas, 300 faros y 140 iglús hasta la fecha del 30 de septiembre de 2020. Además, permite publicitar experiencias de todo tipo tales como clases de surf en Australia, aventuras en trineo con perros en Alaska, o clases de cocina en Italia. (“Sobre Airbnb”)
+
+
+##### 1.2. Cómo surgió
+En el año 2008, dos amigos (fundadores de Airbnb, Brian Chesky y Joe Gebbia) con espacio libre en su casa de San Francisco, decidieron hospedar a tres viajeros en ella, propulsando el nacimiento de la compañía, creciendo y llegando millones de viajeros y anfitriones de todo el mundo.
+
+
+##### 1.3. Funcionamiento
+Para acceder a un alojamiento a través de la plataforma los pasos a seguir son sencillos.
+Una vez creada una cuenta gratuita en la app o en la web “www.airbnb.com”, y ya seleccionado el destino, es posible filtrar los hospedajes deseados en función del precio que se está dispuesto a pagar, la zona, si es una habitación compartida, habitación privada, un piso, algún otro tipo de alojamiento o si ha de contar con alguna comodidad en particular. Posteriormente, es posible ver fotos del sitio elegido, donde además se encuentran disponibles las opiniones de huéspedes previos.
+Una vez seleccionado el alojamiento deseado en determinada fecha, se procede a la reserva del mismo. El pago se efectúa a través de la plataforma, donde hay servicios al cliente 24 horas los siete días de la semana en varios idiomas, tanto para los huéspedes como para los anfitriones. 
+Una vez en el destino, es posible contratar diversas experiencias con el fin de conocer de una forma diferente y poco convencional el lugar del viaje.
+
+
+##### 1.4. Airbnb en Nueva York
+Dado el amplio abanico de opciones de alojamiento que ofrece esta plataforma, es posible seleccionar un punto en el que hospedarse sin necesidad de pasar por un hotel, y elegir libremente la zona dependiendo de los intereses individuales, tales como la cercanía a una estación de metro, o una atracción / zona turística en particular.
+Dicho esto, y haciendo referencia al artículo (“¿Airbnb es ilegal?”), los alquileres de apartamentos enteros en la ciudad de Nueva York por periodos inferiores a 30 días han sido prohibidos con la justificación de que los alquileres de pisos se han encarecido por la actividad de estas plataformas, generando estragos en empresas que se dedican a este negocio. 
+Incluso se ha llegado a un litigio legal entre el ayuntamiento de Nueva York y las empresas que controlan estas plataformas, tal y como se comenta en este artículo (“Litigio entre alcaldía de NYC y Airbnb”). Luego de numerosas idas y venidas, el poder judicial en el año 2019 ha desestimado la petición del gobierno de la ciudad para la autorización de recabación de datos acerca de los huéspedes y anfitriones que negociaban hospedajes de pisos, denotando de esta forma, una ligera victoria para el sector.
+Un aspecto a destacar es que en caso de incumplirse la ley, se aplican multas de 1000 dólares pudiendo llegar hasta 7500 dólares aplicándose únicamente a los anfitriones. Por lo cual, de hace un tiempo al día de hoy, los alojamientos por periodos inferiores al mes deben ser en habitaciones compartidas o privadas, mientras que en periodos superiores, la opción disponible se amplía al alojamiento entero también, en consecuencia el precio se incrementa sustancialmente. 
+
+
+
+#### 2. Objetivo y preguntas
+
+Nuestro principal objetivo es centrarnos en el precio de los alojamientos, las zonas de manhattan y el tipo de alojamiento. Concretamente queremos contestar las siguientes preguntas:
+
+1- ¿Qué tipo de alojamientos son los más comunes?
+2- ¿El tipo de alojamiento difiere según la zona?
+3- ¿El coste varía mucho según la zona donde se localize el alojamiento?
+4- ¿Cuál es el coste promedio para cada tipo de alojamiento?
+
+#### 3. Las siete fases
+Este dataset describe la actividad y métricas de la plataforma de Airbnb en la ciudad de Nueva York para el año 2019. Útil para la exploración, visualización y predicción
+https://www.kaggle.com/dgomonov/new-york-city-airbnb-open-data 
+El dataset se compone de 16 variables y 48.895 observaciones. Las variables son: 
+
+- Id del aviso.
+- Descripción del alojamiento en el aviso. 
+- Id del host.
+- Nombre del host.
+- Distritos de NYC (Manhattan, Bronx, Brooklyn, Queens y Staten Island).
+- Barrios de cada distrito.
+- Latitud.
+- Longitud.
+- Tipo de alojamiento (piso entero, habitación privada o habitación compartida).
+- Precio en dólares por noche.
+- Número mínimo de noches.
+- Número de reseñas del alojamiento.
+- Fecha de la última reseña.
+- Número de reseñas mensuales.
+- Cantidad de alojamientos que ha tenido un host.
+- Disponibilidad del alojamiento en días en el periodo de un año.
+
+##### 3.1. Adquisición
+Los datos descritos como introducción a este apartado, han sido obtenidos de kaggle. Kaggle es una plataforma online orientada al Data Mining en la que las empresas publican sus datos en código abierto y para posteriormente comenzar concursos con premio millonarios protagonizados por expertos en Data Mining en donde estos intentan poner solución a problemas de estas compañías en cuestión (“¿Qué es kaggle?”). Los datos estaban disponibles en formato csv, aunque aunque la descarga dio como resultado un fichero Excel con una sola columna en donde los valores de cada variable se separan por comas, formato no muy agraciado a la vista. 
+
+```{r, include=FALSE, warning=FALSE}
+setwd("/Applications/3ero/VIS/archive")
+datos_mal = read.csv2("AB_NYC_2019.csv",encoding = "UTF-8")
+datos_totales1 <- read.csv2("AB_NYC_2019.csv",encoding = "UTF-8", sep = ",")
+
+datos_totales2 = subset(datos_totales1, datos_totales1$minimum_nights <= 30)
+
+datos_totales = subset(datos_totales2, datos_totales2$price <= 1000)
+
+datos_manhattan <- subset(datos_totales, datos_totales$neighbourhood_group == 'Manhattan')
+
+datos_manhattan = datos_manhattan[(!datos_manhattan$room_type == "Shared room"),]
+
+
+
+data <- as.data.frame(datos_manhattan)
+```
+
+```{r echo = FALSE}
+colnames(datos_mal)
+datos_mal[1:5,1]
+```
+
+
+##### 3.2. Formateado
+Una vez adquiridos los datos, procedemos a darles el formato adecuado para trabajar con ellos. 
+En primer lugar, necesitamos unos datos en forma de tabla en los que cada columna sea una variable y cada fila un individuo para poder trabajar con ellos. Basta con leerlos de una forma adecuada y tenemos nuestros datos en forma tabular. 
+
+```{r}
+datos_totales1 <- read.csv2("AB_NYC_2019.csv",encoding = "UTF-8", sep = ",")
+```
+
+```{r echo=FALSE}
+datos_totales1[1:10,c(1,3:7)]
+```
+
+
+Ahora, procedemos a transformar las variables para poderlas utilizar más adelante. Concretamente, a la latitud y la longitud les aplicamos la conversión a carácter y luego a numérico para poder utilizarlas en el mapa puesto que su formato original es de tipo factor. A continuación, convertimos a numérico la variable “price” y a tipo factor la variable “room type”, ambas transformaciones serán útiles a la hora de efectuar representaciones, puesto que originalmente eran de tipo carácter. 
+
+```{r}
+data$latitude <- as.numeric(as.character(data$latitude))
+
+data$longitude <- as.numeric(as.character(data$longitude))
+
+data$price <- as.numeric(data$price)
+
+data$room_type <- factor(data$room_type)
+
+```
+
+##### 3.3. Filtrado
+En nuestros datos contamos con información acerca de toda la ciudad de Nueva York, y sus subáreas. Dado que nuestra pregunta de interés se circunscribe únicamente a los alojamientos en un rango de precios entre 30 y 1000 dólares ubicados en el área de Manhattan, con la función “subset” generamos un subconjunto de aquellos que cumplen esas características, eliminando de esta forma las áreas que no pertenezcan a Manhattan.
+
+```{r}
+datos_totales2 = subset(datos_totales1, datos_totales1$minimum_nights <= 30)
+
+datos_totales = subset(datos_totales2, datos_totales2$price <= 1000)
+
+datos_manhattan <- subset(datos_totales, datos_totales$neighbourhood_group == 'Manhattan')
+
+
+data <- as.data.frame(datos_manhattan)
+```
+
+```{r echo=FALSE}
+data$latitude <- as.numeric(as.character(data$latitude))
+
+data$longitude <- as.numeric(as.character(data$longitude))
+
+data$price <- as.numeric(data$price)
+
+data$room_type <- factor(data$room_type)
+
+```
+
+
+Además, descartamos de nuestro estudio las habitaciones compartidas ya que representan menos del 3%. 
+
+Número de habitaciones compartidas ofrecidas
+```{r echo = FALSE}
+sum(data$room_type == "Shared room")
+```
+
+
+Número de habitaciones privadas ofrecidas
+```{r}
+sum(data$room_type == "Private room")
+```
+
+
+Número de apartamentos enteros ofrecidos
+```{r}
+sum(data$room_type == "Entire home/apt")
+```
+
+
+Gráficamente
+```{r echo = FALSE}
+data$room_type = as.factor(data$room_type)
+ggplot(data=data, aes(x= room_type)) + 
+    geom_bar(stat="count", fill = "#FA8072")+ ylab("Número de alojamientos") +  xlab("Tipo de alojamiento")
+```
+
+
+Pueden observarse diferencias significativas entre el tamaño de las barras. Debido a esto, a la hora de graficar, los apartamentos y las habitaciones privadas predominarán sobre las habitaciones compartidas y no podrán verse resultados concluyentes en los gráficos. Por lo tanto, procedemos a eliminar dicho factor. 
+```{r}
+data = data[(!data$room_type == "Shared room"),]
+```
+
+
+##### 3.4. Minado
+Como se ha mencionado antes Manhattan cuenta con más de 30 barrios, lo que puede dificultar sustancialmente la claridad de visualización de los datos. Por lo tanto, hemos decidido condensar los barrios en 10 zonas tomando como ejemplo un shapefile de Internet de tal forma que las nuevas comarcas son:
+Washington Heights - Inwood. Incluye Inwood, Washington Heights y Marble Hill
+Central Harlem - Morningside Heights. Incluye Morningside Heights y Harlem
+East Harlem
+Upper West Side
+Upper East Side. Incluye Upper East Side y Roosevelt Island
+Gramercy Park -  Murray Hill. Incluye Gramercy, Kips Bay, Little Italy, Murray Hill, Nolita, Stuyvesant Town y Flatiron District
+Greenwich Village - Soho. Incluye Greenwich Village, SoHo, West Village, Chinatown y Civic Center
+Union Square - Lower East Side. Incluye Lower East Side y East Village
+Lower Manhattan. Incluye Tribeca, Two Bridges, Financial District y Battery Park City
+
+```{r include = FALSE}
+#1
+data$Zonas_agregadas[data$neighbourhood == "Inwood"] <- "Washington Heights - Inwood"
+data$Zonas_agregadas[data$neighbourhood == "Washington Heights"] <- "Washington Heights - Inwood"
+data$Zonas_agregadas[data$neighbourhood == "Marble Hill"] <- "Washington Heights - Inwood"
+
+
+#2
+data$Zonas_agregadas[data$neighbourhood == "Morningside Heights"] <- "Central Harlem - Morningside Heights"
+data$Zonas_agregadas[data$neighbourhood == "Harlem"] <- "Central Harlem - Morningside Heights"
+
+
+#3
+data$Zonas_agregadas[data$neighbourhood == "East Harlem"] <- "East Harlem"
+
+
+#4
+data$Zonas_agregadas[data$neighbourhood == "Upper West Side"] <- "Upper West Side"
+
+
+#5
+data$Zonas_agregadas[data$neighbourhood == "Roosevelt Island"] <- "Upper East Side"
+data$Zonas_agregadas[data$neighbourhood == "Upper East Side"] <- "Upper East Side"
+
+
+#6
+data$Zonas_agregadas[data$neighbourhood == "Midtown"] <- "Chelsea - Clinton"
+data$Zonas_agregadas[data$neighbourhood == "Chelsea"] <- "Chelsea - Clinton"
+data$Zonas_agregadas[data$neighbourhood == "Hell's Kitchen"] <- "Chelsea - Clinton"
+data$Zonas_agregadas[data$neighbourhood == "NoHo"] <- "Chelsea - Clinton"
+data$Zonas_agregadas[data$neighbourhood == "Theater District"] <- "Chelsea - Clinton"
+
+
+#7
+data$Zonas_agregadas[data$neighbourhood == "Gramercy"] <- "Gramercy Park -  Murray Hill"
+data$Zonas_agregadas[data$neighbourhood == "Kips Bay"] <- "Gramercy Park -  Murray Hill"
+data$Zonas_agregadas[data$neighbourhood == "Little Italy"] <- "Gramercy Park -  Murray Hill"
+data$Zonas_agregadas[data$neighbourhood == "Murray Hill"] <- "Gramercy Park -  Murray Hill"
+data$Zonas_agregadas[data$neighbourhood == "Nolita"] <- "Gramercy Park -  Murray Hill"
+data$Zonas_agregadas[data$neighbourhood == "Stuyvesant Town"] <- "Gramercy Park -  Murray Hill"
+data$Zonas_agregadas[data$neighbourhood == "Flatiron District"] <- "Gramercy Park -  Murray Hill"
+
+
+
+#8
+data$Zonas_agregadas[data$neighbourhood == "Greenwich Village"] <- "Greenwich Village - Soho"
+data$Zonas_agregadas[data$neighbourhood == "SoHo"] <- "Greenwich Village - Soho"
+data$Zonas_agregadas[data$neighbourhood == "West Village"] <- "Greenwich Village - Soho"
+data$Zonas_agregadas[data$neighbourhood == "Chinatown"] <- "Greenwich Village - Soho"
+data$Zonas_agregadas[data$neighbourhood == "Civic Center"] <- "Greenwich Village - Soho"
+
+
+
+#9
+data$Zonas_agregadas[data$neighbourhood == "Lower East Side"] <- "Union Square - Lower East Side"
+data$Zonas_agregadas[data$neighbourhood == "East Village"] <- "Union Square - Lower East Side"
+
+
+#10
+data$Zonas_agregadas[data$neighbourhood == "Tribeca"] <- "Lower Manhattan"
+data$Zonas_agregadas[data$neighbourhood == "Two Bridges"] <- "Lower Manhattan"
+data$Zonas_agregadas[data$neighbourhood == "Financial District"] <- "Lower Manhattan"
+data$Zonas_agregadas[data$neighbourhood == "Battery Park City"] <- "Lower Manhattan"
+```
+
+
+```{r echo = FALSE}
+#Se vuelven a cargar los datos para asegurarnos que todo está correctamente
+
+setwd("/Applications/3ero/VIS/archive")
+datos_totales1 <- read.csv2("AB_NYC_2019.csv",encoding = "UTF-8", sep = ",")
+
+datos_totales2 = subset(datos_totales1, datos_totales1$minimum_nights <= 30)
+
+datos_totales = subset(datos_totales2, datos_totales2$price <= 1000)
+
+datos_manhattan <- subset(datos_totales, datos_totales$neighbourhood_group == 'Manhattan')
+
+datos_manhattan = datos_manhattan[(!datos_manhattan$room_type == "Shared room"),]
+
+
+
+data <- as.data.frame(datos_manhattan)
+
+
+
+#1
+data$Zonas_agregadas[data$neighbourhood == "Inwood"] <- "Washington Heights - Inwood"
+data$Zonas_agregadas[data$neighbourhood == "Washington Heights"] <- "Washington Heights - Inwood"
+data$Zonas_agregadas[data$neighbourhood == "Marble Hill"] <- "Washington Heights - Inwood"
+
+
+#2
+data$Zonas_agregadas[data$neighbourhood == "Morningside Heights"] <- "Central Harlem - Morningside Heights"
+data$Zonas_agregadas[data$neighbourhood == "Harlem"] <- "Central Harlem - Morningside Heights"
+
+
+#3
+data$Zonas_agregadas[data$neighbourhood == "East Harlem"] <- "East Harlem"
+
+
+#4
+data$Zonas_agregadas[data$neighbourhood == "Upper West Side"] <- "Upper West Side"
+
+
+#5
+data$Zonas_agregadas[data$neighbourhood == "Roosevelt Island"] <- "Upper East Side"
+data$Zonas_agregadas[data$neighbourhood == "Upper East Side"] <- "Upper East Side"
+
+
+#6
+data$Zonas_agregadas[data$neighbourhood == "Midtown"] <- "Chelsea - Clinton"
+data$Zonas_agregadas[data$neighbourhood == "Chelsea"] <- "Chelsea - Clinton"
+data$Zonas_agregadas[data$neighbourhood == "Hell's Kitchen"] <- "Chelsea - Clinton"
+data$Zonas_agregadas[data$neighbourhood == "NoHo"] <- "Chelsea - Clinton"
+data$Zonas_agregadas[data$neighbourhood == "Theater District"] <- "Chelsea - Clinton"
+
+
+#7
+data$Zonas_agregadas[data$neighbourhood == "Gramercy"] <- "Gramercy Park -  Murray Hill"
+data$Zonas_agregadas[data$neighbourhood == "Kips Bay"] <- "Gramercy Park -  Murray Hill"
+data$Zonas_agregadas[data$neighbourhood == "Little Italy"] <- "Gramercy Park -  Murray Hill"
+data$Zonas_agregadas[data$neighbourhood == "Murray Hill"] <- "Gramercy Park -  Murray Hill"
+data$Zonas_agregadas[data$neighbourhood == "Nolita"] <- "Gramercy Park -  Murray Hill"
+data$Zonas_agregadas[data$neighbourhood == "Stuyvesant Town"] <- "Gramercy Park -  Murray Hill"
+data$Zonas_agregadas[data$neighbourhood == "Flatiron District"] <- "Gramercy Park -  Murray Hill"
+
+
+
+#8
+data$Zonas_agregadas[data$neighbourhood == "Greenwich Village"] <- "Greenwich Village - Soho"
+data$Zonas_agregadas[data$neighbourhood == "SoHo"] <- "Greenwich Village - Soho"
+data$Zonas_agregadas[data$neighbourhood == "West Village"] <- "Greenwich Village - Soho"
+data$Zonas_agregadas[data$neighbourhood == "Chinatown"] <- "Greenwich Village - Soho"
+data$Zonas_agregadas[data$neighbourhood == "Civic Center"] <- "Greenwich Village - Soho"
+
+
+
+#9
+data$Zonas_agregadas[data$neighbourhood == "Lower East Side"] <- "Union Square - Lower East Side"
+data$Zonas_agregadas[data$neighbourhood == "East Village"] <- "Union Square - Lower East Side"
+
+
+#10
+data$Zonas_agregadas[data$neighbourhood == "Tribeca"] <- "Lower Manhattan"
+data$Zonas_agregadas[data$neighbourhood == "Two Bridges"] <- "Lower Manhattan"
+data$Zonas_agregadas[data$neighbourhood == "Financial District"] <- "Lower Manhattan"
+data$Zonas_agregadas[data$neighbourhood == "Battery Park City"] <- "Lower Manhattan"
+
+
+
+data$latitude <- as.numeric(as.character(data$latitude))
+
+data$longitude <- as.numeric(as.character(data$longitude))
+
+data$price <- as.numeric(data$price)
+
+data$room_type <- factor(data$room_type)
+
+
+
+
+```
+
+
+
+##### 3.5. Representación
+Una de nuestras preguntas consiste en ver qué zonas son las más ofrecidas para alojamientos dentro de la plataforma de Airbnb y por qué. Para dar respuesta a esta pregunta hemos optado por un gráfico de barras en donde se vea la cantidad de apartamentos en cada uno de los barrios. Además, como disponemos de las variables latitud y longitud, queremos reforzarlo en un mapa para ver gráficamente dónde están las zonas más ofrecidas y si esto se debe a algo en particular. Empecemos explicando el paso a paso del gráfico de barras.
+
+Primero, optamos por hacer un gráfico de barras convencional con una sola barra por barrio. Algo como esto:
+
+```{r echo = FALSE}
+ggplot(data=data, aes(x=neighbourhood)) + geom_bar(stat="count") + coord_flip()
+```
+
+
+Luego, nos dimos cuenta de al contar con dos tipos de alojamiento sería más adecuado separar la información. De esta forma, podíamos estudiar qué zonas eran más turísticas y ofrecían más apartamentos y qué barrios ofrecían más habitaciones privadas. Esto lo quisimos graficar con un gráfico de barras agrupadas ya que los resultados se observan mejor en forma de longitud de unas barras que nacen del mismo eje. 
+
+
+```{r echo = FALSE}
+  ggplot(data = data, aes(x = neighbourhood, fill=room_type)) +
+  geom_bar(stat = "count", position = "dodge")+
+  coord_flip()
+```
+
+
+Como se puede observar en el gráfico, hay muchas barras y demasiados barrios como para fijarse en si hay alguno que puede llamar la atención. Por lo tanto, decidimos condensar la información como ya se ha comentado la parte de minado de los datos. 
+
+```{r echo = FALSE}
+  ggplot(data = data, aes(x =Zonas_agregadas, fill=room_type)) +
+  geom_bar(stat = "count", position = "dodge")+
+  coord_flip()
+
+```
+
+En el caso del mapa, comenzamos decidiendo qué tipo de librería era la más adecuada para lo que nosotras queríamos mostrar, que era un mapa en donde se pudieran visualizar las zonas de forma clara y pudierámos, además, añadir puntos con zonas muy visitadas de Manhattan. Nuestras opciones más importantes eran:
+
+Un Cloropeto en en que el rellenado de color de las zonas fuera un degradado en función del número de apartamentos
+Un mapa de la librería MapBox
+Un mapa de la librería GetMap
+Un mapa de leaflet
+Un mapa de la librería shiny
+
+Shiny daba unos mapas muy poco estéticos y las zonas no estaban muy bien definidas por lo que descartamos rápido estos mapas. Luego, map box siempre graficaba mapas mundiales y para observar los puntos de una zona concreta de Nueva York había que hacer mucho zoom. Decidimos descartar también esta librería y comenzar a buscar un shapefile en Internt para responder a nuestra pregunta en forma de cloropeto, pero la búsqueda descubrimos la librería leaflet que tiene a su disposición distintos tipos de mapa (claros, oscuros, con tonos grises, tonos verdes...) además de ser muy estéticos y permitiendo añadir los puntos adicionales que buscábamos. En un principio, utilizamos la librería de forma correcta y no había forma de graficar nada sin que se colgara el programa, sin embargo, investigamos qué formas tenía leaflet de graficar miles de puntos y encontramos la óptima.
+
+```{r echo=FALSE}
+map <- leaflet(data) %>% addCircles()
+map
+```
+
+Se puede ver que el mapa no es muy agraciado y los puntos son demasiado grandes como para ver algo. Por lo tanto, decidimos añadir un mapa de calles con el mar de color azul y disminuir el tamaño de los puntos para que fuese más visible. Luego, añadimos un punto en las zonas más populares de Manhattan. 
+
+```{r}
+sites_lugares <- data.frame(longitude = c(-73.9653551, -73.9856644, -73.985131, -73.994877, -73.963244, -74.0048911708541, -73.9774991821081, -74.0151217), latitude = c(40.7828647, 40.7484405, 40.758895, 40.704345, 40.7794366, 40.74770385, 40.7616124,40.711732), Lugares = c("Central Park", "Empire State", "Times square", "Puente de Brooklyn", "Museo Metropolitano de Arte", "High Line", "MoMa Museum","One World Trade Center"))
+
+
+map <- leaflet(data) %>% addCircles(color = ~id) %>% addProviderTiles(providers$MtbMap) %>% addProviderTiles(providers$Stamen.TonerLines, options = providerTileOptions(opacity = 0.35)) %>% addProviderTiles(providers$Stamen.TonerLabels) %>% addCircleMarkers(data = sites_lugares, lat = ~latitude, lng = ~longitude, color = "red", radius = 0.5)
+map
+```
+
+En siguientes gráficos queríamos mostrar el coste promedio para que pudiera responder a: "¿Cuál es el coste promedio para cada tipo de alojamiento?" y a "¿El precio varía según el número de noches?", esta última pregunta, que luego descartamos. En un primer lugar, decidimos hacer un gráfico de distribución del número de noches en función del precio por noche, pero habían demasiados puntos y la información no se visualizaba de forma clara. Luego añadimos algunos filtros para que los puntos se viesen mejor, pero no fue suciciente, es por ello que decidimos recurrir al histograma. Aunque no se viese de forma concisa cuál era la media exacta, sí se puede ver si la distribución de precios cambia por alojamiento y el número de noches mínimo. 
+
+```{r echo=FALSE}
+ggplot(data, aes(x=price)) + geom_histogram(bins = 100)
+
+```
+
+Con los filtros se puedes separar las distribuciones por tipo de apartamento y por zonas, incluso, pero para que se pueda ver casi desde el principio si existen diferencias, creemos que es mejor separar las distribuciones en dos grupos, una por cada tipo de habitación. 
+
+```{r echo=FALSE}
+
+ggplot(data, mapping=(aes(x=price, fill=room_type))) + geom_histogram(bins = 30, alpha= 0.9)
+
+```
+
+No es un gráfico muy estético, pero se utiliza plot_ly() para hacerlo más bonito y darle interactividad. 
+
+Por último, para mostrar el precio por zonas teníamos muchas opciones:
+Un cloropeto con un degradado de colores por precio
+Representarlo en el mapa en donde los puntos más oscuros fuesen los apartamentos más caros
+Con un Heat Map igual que lo hacía Tableau (Un cuadrado por barrio y el tamaño y color de los mismos representan el precio)
+Un Box & Wisker múltiple
+Con barras agrupadas, apiladas...
+
+Debido a que R no realizaba el Heat Map que búscabamos, nos decantamos en un principio con el gráfico de cajas y bigotes. En el cual se puede ver mucha información como el rango de datos por zona y si existen alojamientos muy caros aunque la media de precio por zona fuese baja. Por ejemplo, es notoria la presencia de precios a la baja por noche en los alojamientos ubicados en las áreas de Washington Heights - Inwood, East Harlem y Central Harlem - Morningside Heights cuyos valores se encuentran en un rango bastante acotado con pocas instancias de precios más elevados. 
+
+Así mismo, en zonas como Lower Manhattan, Greenwich Village - Soho y Chelsea - Clinton, se nota el efecto contrario, donde el rango de precios es superior además de presentar mayor número de datos extremos, fundamentalmente en Chelsea - Clinton.
+
+Dicho esto, hemos de destacar que hay áreas con precios y rangos muy similares, como es el caso de las zonas comentadas previamente, así como en Upper West Side, Upper East Side y Union Square - Lower East Side ubicadas en un punto medio respecto al resto.
+
+
+```{r}
+g<-ggplot(data ,aes(x=Zonas_agregadas, y=price,fill=Zonas_agregadas)) +
+    geom_boxplot(alpha=0.3) + scale_fill_brewer(palette = "Reds")+ coord_flip()+
+    theme(legend.position="none")+ylab("Precio")+xlab("Zonas de Manhattan")+ ggtitle("Distribución del precio en función de la zona")
+g
+```
+
+
+Sin embargo, este gráfico no era atractivo en el dashboard por lo que decidimos sustituirlo por algo más simple; un gráfico de barras donde se representara el precio medio por zona.
+
+```{r echo=FALSE}
+dg <- data %>% group_by(Zonas_agregadas) %>% summarise(media = mean(as.numeric(as.character(price)), na.rm = TRUE))
+
+dg_or <- within(dg,Zonas_agregadas <- factor(Zonas_agregadas, levels = names(sort(table(Zonas_agregadas),
+                                                                          decreasing = TRUE)))) 
+
+
+precio = ggplot(dg_or, aes(x=Zonas_agregadas, y=media)) + 
+  geom_bar(stat = "identity")+ coord_flip() 
+
+precio
+```
+
+
+Por último, para que la diferecia de precios se viese más rápido y sin tener que estar midiendo con una regla qué barra es más larga, ordenamos las barras en función del precio medio. 
+
+```{r}
+precio = ggplot(dg_or, aes(x=reorder(Zonas_agregadas, media), y=media)) + 
+  geom_bar(stat = "identity")+ coord_flip() 
+
+precio
+```
+
+
+De esta forma queda todo más visual. Dejamos las partes estéticas para el refinado. 
+
+##### 3.6. Refinado 
+
+
+En esta etapa, con el fin de mejorar la estética de las visualizaciones, evitar sobrecargar los gráficos ocultando información redundante e ir en la dirección afín a la compañía, el color para las representaciones será el mismo al establecido en su logotipo. Es decir, aquellos colores pertenecientes a la gama de los rojos, grises y blanco.
+
+
+En el caso del gráfico de barras que representa el número de alojamientos por barrio nos limitamos a cambiar el nombre a los ejes y a la leyenda además de colcarla arriba del gráfico. Por último, ponemos las barras del color del logo de la compañía.
+
+
+
+```{r include = FALSE, warning=FALSE}
+d_barras <- within(data, 
+               Zonas_agregadas <- factor(Zonas_agregadas, levels = names(sort(table(Zonas_agregadas),
+                                                                          decreasing = TRUE))))
+
+ 
+
+barras = d_barras %>% group_by(room_type) %>%
+  count(Zonas_agregadas) %>%
+  ggplot(aes(x = reorder(Zonas_agregadas, n), y = n, fill = room_type)) + coord_flip() + 
+  geom_bar(stat = 'identity', position=position_dodge()) + 
+  scale_fill_manual("Tipo de alojamiento", labels = c("Piso","Habitación privada") , values  = c('#FA8072', 'gray')) + ylab("Alojamientos") + theme(axis.title.y=element_blank(), axis.ticks.y=element_blank()) + theme(legend.position = "top")
+
+barras
+```
+
+En cuanto al mapa, cambiamos el fondo a uno de tonos grises para que no resaltara demasiado en el dashboard y siguiera las tonalidades principales, y cambiamos el color de los puntos al mismo tono de salmón del gráfico de barras y los puntos añadidos los cambiamos de rojo a negro para que resalten más.
+
+```{r echo = FALSE, warning=FALSE}
+sites_lugares <- data.frame(longitude = c(-73.9653551, -73.9856644, -73.985131, -73.994877, -73.963244, -74.0048911708541, -73.9774991821081, -74.0151217), latitude = c(40.7828647, 40.7484405, 40.758895, 40.704345, 40.7794366, 40.74770385, 40.7616124,40.711732), Lugares = c("Central Park", "Empire State", "Times square", "Puente de Brooklyn", "Museo Metropolitano de Arte", "High Line", "MoMa Museum","One World Trade Center"))
+
+beatCol <- colorNumeric(palette = '#FA8072', data$id)
+
+map <- leaflet(data) %>% addProviderTiles(providers$CartoDB.Positron) %>% addProviderTiles(providers$Stamen.TonerLines, options = providerTileOptions(opacity = 0.35)) %>% addProviderTiles(providers$Stamen.TonerLabels) %>% addCircles(color = ~beatCol(id), weight = 0.1) %>% addCircleMarkers(data = sites_lugares, lat = ~latitude, lng = ~longitude, color = "black", radius = 0.5) 
+map
+```
+
+
+
+En cuanto al histograma, decidimos utilizar plot_ly() ya que da como resultado gráficos más agraciados en caso del histograma. Añadimos algo de transparecia y ponemos los dos colores utilizamos anteriormente a ambas distribuciones. De tal forma que el apartamento entero tendrá una distribución de precios salmón y la habitación privada gris.
+
+```{r echo=FALSE, warning=FALSE}
+
+histo1 <- plot_ly(data, alpha = 0.9, x = ~price, type = "histogram", color = ~room_type, colors =  c('#FA8072','#9b9b9b')) %>% style(hoverinfo = 'none')
+
+
+histo1
+
+```
+
+
+En el gráfico de barras del precio medio por zona, hemos eliminado la leyenda del color, borrado el nombre del eje 'y' además de las marcas por línea del mismo eje y renombrado el eje 'x'. De tal forma que queda así:
+
+```{r echo=FALSE, warning=FALSE}
+dg <- data %>% group_by(Zonas_agregadas) %>% summarise(media = mean(as.numeric(as.character(price)), na.rm = TRUE))
+
+dg_or <- within(dg,Zonas_agregadas <- factor(Zonas_agregadas, levels = names(sort(table(Zonas_agregadas),
+                                                                          decreasing = TRUE)))) 
+
+
+precio = ggplot(dg_or, aes(x=reorder(Zonas_agregadas, media), y=media, fill = '#FA8072')) + 
+  geom_bar(stat = "identity", show.legend = FALSE) + ylab("Precio medio") +  theme(axis.title.y=element_blank(), axis.ticks.y=element_blank())+ coord_flip() 
+precio
+
+```
+
+Por último, como hay varias barras cuyo tamaño es muy paecido, creemos que indicando el valor medio del precio en la barra se puede ver más fácilmente la diferencia entre ellas. Este sería nuestro gráfico de barras definitivo, solo faltaría añadirle algo de interacción.  
+
+```{r echo=FALSE}
+precio = ggplot(dg_or, aes(x=reorder(Zonas_agregadas, media), y=media, fill = '#FA8072')) + 
+  geom_bar(stat = "identity", show.legend = FALSE) + ylab("Precio medio") + geom_text(aes(label = round(media, 2)), color = "white", position = position_stack(vjust=0.9), size = 4) +  theme(axis.title.y=element_blank(), axis.ticks.y=element_blank())+ coord_flip() 
+precio
+
+```
+
+
+
+##### 3.7. Interación 
+
+En la última fase de la visualización, añadimos el factor interactivo al mapa y al histograma. 
+Para el mapa, es posible realizar zoom a una zona en particular, desplazarse de un lugar a otro deslizando en el plano, además de ver los nombres de las zonas marcadas en puntos gris oscuro nombradas previamente gracias a un pop-up y los barrios de Manhattan. Además, en el histograma se puede ver el número de apartamentos exacto en cada barra así como el rango de precios que representa y el barrio mayoritario. 
+Puesto que es interesante observar las características en su conjunto, establecimos filtros que afectan a ambas representaciones a la vez. 
+Los mismos son: selección de un subconjunto de áreas a partir de una ventana desplegable conteniendo el nombre de la/s correspondientes zonas de interés, una barra deslizante que selecciona un rango con el número mínimo de noches y selección del tipo de alojamiento gracias a un filtro de casillas. 
+Gracias a ello, en el mapa de manera geográfica es posible ver en cuánto puede variar la oferta según el número mínimo de noches o el tipo de alojamiento, para una o varias zonas determinadas. 
+Al mismo tiempo, de la mano del mapa, en el histograma será posible ver cómo varía la distribución del precio el decantarnos por un sitio u otro, un determinado hospedaje o el número de noches a permanecer.
+
+
+
+```{r setup, echo = FALSE, warning=FALSE, results = 'asis'}
+
+d <- highlight_key(data)
+
+seleccion <- bscols(filter_checkbox("room_type","Tipo de alojamiento",d,~room_type),
+                    filter_select("Zonas_agregadas","Barrios",d,~Zonas_agregadas, allLevels = TRUE))
+
+
+```
+
+
+```{r echo=FALSE}
+map <- leaflet(d) %>% addProviderTiles(providers$CartoDB.Positron) %>% addProviderTiles(providers$Stamen.TonerLines, options = providerTileOptions(opacity = 0.35)) %>% addProviderTiles(providers$Stamen.TonerLabels) %>% addCircles(color = ~beatCol(id), weight = 0.1, popup = data$Zonas_agregadas) %>% addCircleMarkers(data = sites_lugares, lat = ~latitude, lng = ~longitude, popup = ~Lugares, color = "black", radius = 0.5) %>% highlight("plotly_selected")
+```
+
+```{r echo=FALSE}
+histo1 <- plot_ly(d, alpha = 0.9, x = ~price, type = "histogram", color = ~room_type, colors =  c('#FA8072','#9b9b9b'), text = ~Zonas_agregadas, hoverinfo = 'text, y') 
+histo1
+
+bscols(widths = c(12, 6, 6),histo1, map,seleccion)
+
+```
+
+
+En cuanto a los 2 últimos gráficos, solo hemos añadido una pequeña interacción al gráfico de barras apiladas, de tal forma que al pasar el ratón por encima de las barras de puede ver el número exacto de apartamentos que hay en esa zona en concreto. Además, al clicar sobre la leyenda las barras se filtran por tipo de apartamento. El gráfico que representa el precio medio pensamos que es lo suficiente visual y no necesita interacción extra. 
+
+Precio medio 
+
+```{r echo=FALSE}
+precio_d = ggplotly(precio, tooltip = "None") %>% layout(showlegend= FALSE)
+precio_d
+```
+
+
+Barras numero de apartamentos por barrio
+
+```{r echo = FALSE}
+inter_barras = ggplotly(barras, tooltip = "n") %>%
+layout(legend = list(orientation = "h", x = 0.2, y =1.1))
+inter_barras
+```
+
+
+Queremos que nuestro dashboard sea algo parecido a esto. Como rmarkdown tiene una plataforma específica para hacer dashboards vamos a hacer uso de la misma para el video y la entrega. 
+
+```{r echo = FALSE, warning=FALSE}
+
+bscols(widths = c(2,4,6,6,6), seleccion, map, histo1, inter_barras, precio_d)
+```
+
+#### 4. Conclusión al trabajo
+
+Este ha sido un proyecto breve en cuanto a las preguntas y sus respectivas respuestas debido a que la principal dificultad se encontraba en generar códido en R y realizar un Dashboard hecho por nosotras mismas. Desde un principio teníamos claro que no íbamos a utilizar Tableu ya que queríamos poner en práctica el tercer bloque de esta asignatura. Somos conscientes de que las prácticas de ggplot() y plot_ly() eran muy simples y necesitábamos enfrentarnos a un código para ser realmente conscientes de lo que sabemos y no sabemos hacer con estas funciones. Sí es cierto que el principio fue lo más complicado ya que no teníamos la suficiente soltura como para hacer las cosas bien y menos aún rápido. Nos costó una semana y media ordenar un gráfico de mayor a menor longitud de las barras o elegir qué tipo de gráfico de baras y con qué función íbamos a utilizar. En cuanto al mapa, hay que mencionar que R presenta múltiples paquetes que hacen lo mismo, pero con distintas estéticas a la hora de visualizar y no fue tarea fácil. Para hacer el mapa nos costó un par de meses quedarnos con leaflet, además de que dentro de leaflet no podíamos graficar los puntos porque estábamos utilizando una función equivocada. 
+Luego, el tema de los filtros también ha causado algunos problemas. No hemos encontrado forma de unir un gráfico a filtros comunes e individuales ni forma de clicar sobre una barra y que el los puntos se remarquen en el mapa. Es cierto que el tema de los filtros es lo último que se dio en la asignatura y es lo que menos tiempo hemos tenido para investigar, pero al final hemos conseguido casi todo lo que teníamos en mente con los filtros simples. 
+
+En conclusión, ha sido un trabajo muy costoso al principio, pero luego de avance rápido y muy satisfactorio al final del mismo. Estamos muy contentas con el resultado tanto estético como con el contenido del mismo. 
+
+
+#### 5. Webgrafía
+(“Sobre Airbnb”) https://news.airbnb.com/es/about-us/ 
+
+(“¿Airbnb es ilegal?”) https://www.hosteltur.com/125803_airbnb-logra-una-victoria-temporal-frente-a-las-autoridades-de-nueva-york.html 
+
+(“Litigio entre alcaldía de NYC y Airbnb”) https://www.efe.com/efe/america/portada/juez-paraliza-una-ley-que-buscaba-poner-coto-a-airbnb-en-nueva-york/20000064-3857532 
+
+“¿Qué es kaggle?” Un poco de Java +, https://unpocodejava.com/2015/12/23/que-es-kaggle/.
